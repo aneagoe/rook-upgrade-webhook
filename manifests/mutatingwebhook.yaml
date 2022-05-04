@@ -1,0 +1,39 @@
+kind: MutatingWebhookConfiguration
+apiVersion: admissionregistration.k8s.io/v1
+metadata:
+  name: rook-upgrade-webhook
+webhooks:
+  - name: webhook.rook-upgrade.svc
+    admissionReviewVersions:
+    - v1
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values: ["rook-ceph"]
+    objectSelector:
+      matchExpressions:
+      - key: app
+        operator: In
+        values: ["csi-rbdplugin", "csi-cephfsplugin"]
+    failurePolicy: Ignore
+    matchPolicy: Equivalent
+    reinvocationPolicy: Never
+    rules:
+    - apiGroups:
+      - ""
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      resources:
+      - pods
+      scope: '*'
+    sideEffects: NoneOnDryRun
+    timeoutSeconds: 30
+    clientConfig:
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZKekNDQXcrZ0F3SUJBZ0lVVEozY0tBU29jNHhQZlpSMXFMeExaNnFBYk84d0RRWUpLb1pJaHZjTkFRRUwKQlFBd0l6RWhNQjhHQTFVRUF3d1lkMlZpYUc5dmF5NXliMjlyTFhWd1ozSmhaR1V1YzNaak1CNFhEVEl5TURVdwpNakV5TXpneE4xb1hEVEl6TURVd01qRXlNemd4TjFvd0l6RWhNQjhHQTFVRUF3d1lkMlZpYUc5dmF5NXliMjlyCkxYVndaM0poWkdVdWMzWmpNSUlDSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQWc4QU1JSUNDZ0tDQWdFQXVjL0EKcE55UTFzUXVFSG9iYTYxQTRQKy9XVEtnRHRYcmdTNm1YWkN5MjZyM1gzQWl0TDM0N0w1N2NHYXVBemNWbWlMWAoycUVQcXVzRkZkSEZiR1RKQmxwaTV1anpkQnNNMFpyYWd1MUp1N0RQdmRrQS9vNUY5OE1nMnppM0g3ZFFkRDJCCmJDSlZZWnU0VnlDZi85ZHlVTkFnWW1UUVdmWEJSWjVWOC9CWmVCOWM2cFY4TlpQOWd2eTIxTldFZGwyYXdqU2gKVGpWb3JvV1c0NCtDQmNlTHl4UFgyWEJoWGdvNDZuK3BlNUxKRVM3QWNYTjl5YUgxNm5zNStxR0lESW5vZzNSagpJYys0dHZyY3MyQkV0dGRlbU96bW1odGN5SXJxQjRJREU2OUdydGFMdVhaOFlybUJHbDNrSHJ1VmIyL0t3NXFsClQ3ZmkvV0dOYVN4dnppZWk5bkRqYW1mUTNYaWJmY01EaFlXTVg5Tldoa2hGbEh0RWN0Z1UvQjVMTHRMOFhKUTYKYlV3T1dxWDJTWWxUZW1ubEJxZm5HOUZmTTcrSXNqQjRQb2NINjRMMDBTVFpBYW5GOUJEWVhnMlVtV3dFVkk5NApUaXNSVXgwczQwVEVETUZTbzQxTFA3dUsxeGZHSXJzSVVuOFJBNmtIV0E1ZHZBM2M2ZEpBdGhZZ2F6TjhKenNaCmc2dnNOZnMvZUhUaFc0bEgvTUhJZ0VJSUNQVjdwV3BuRGc5TXVSVjIzWU00NjFQdHZnWXBpdHY1WDlSclNJcWUKK2JRa2dDVWlBbWdweTJDeWkyL25iVEM4c3A1elh3b0JiNlFkNTNmaWNWUVlSTmFBSzV1NnNqZ1JQVm9ZMTY4cAp3RTlsMTAvN2dHZUVoVHVoRlI2VVNqcE4xUHBVNWxQdzVTTXhhUE1DQXdFQUFhTlRNRkV3SFFZRFZSME9CQllFCkZNUVd5b0xoVlBaNm1Oc1kzSVRkRjdiaHMwcktNQjhHQTFVZEl3UVlNQmFBRk1RV3lvTGhWUFo2bU5zWTNJVGQKRjdiaHMwcktNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdEUVlKS29aSWh2Y05BUUVMQlFBRGdnSUJBTGVHeXo2egp0WmxpbmVhTCttUkhRUUpOWkN2TzlBU0p6MHJIb0xwRDBvaXlpRkN1VXpORGRPMThIYTdXZUV4YWFWVkw3YzI5CkFaeWM5Q2I1Y1hPb3JzVHJLVDhGajQ2cm1oOVUzNWR2TytwWXpPMjF5RkNGVlROdDlrTDM0YmV4RUtJcDd3Vm4KTmJIelc4OVFmM2c1WmZQQ3FqKzVtVFFpa1RmSVhIUW9qbnk5bUZrWkJ1Z1hqSElhbmtCR01Cb00zWXFNM3ZRSQoxZys1MFNScjl0YTJTb0VQZUlFWng1TiszNUswRlVxT0ExR0w2cE9Lb2xQajA3OE1JZXZJQzQ0b1cvZmFKRTVJCjZ6OTJyUTV3NVRoUEJ1VC80eFJhRVJDM2kyWHhtQVJNd0IrK1l6blRiaWZDbTBqaUtVWjBFRGJjZkNERnZXYUsKeU1BWWhCWW1VazZZZjM4TTZuUzllV2NuYk1PdHNCNjNhTWdqS1RrdHhuUU02SDJ3SDNqSUNCSkVTYUhseGU2NgpxbmVyTXUzSVpPSFBTblRRUksxcUZBaWVTZjF6TUdOclhuZnIrZzl6OTJqazNhRHVUT2xsU1NwelNOSnhTLzlWCnBjSEk1c0gveklaZFNwdndpWSszQmNsRlBVZjl0ZU54cUI1NnZJZjBmOHkvdW9qN0xRNGF3UjJLcDBlMUlYd3UKSzd6OHZVci8wd21yK0thTmtNV2EwdEhTTzR4YmZqN2tUYUVwWmt3T1BHYXRTZlh0bmFBajhuMEtEWGprc0RmMAp0bmVWbWxPc1cvL3Z2SmdMR3p4S0QwUEVSNFI3OTl1bzFFL2NMOUlGR1UvNytEOHQ4Y0JZRGt6REM3MGdhbmlFCkhCRHNQcFRuN0ZmV3BJbFRYV1dnTVNXbHZlclJHL1psS3VVcgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        namespace: rook-upgrade
+        name: webhook
+        path: /mutate

@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: webhook
+  namespace: rook-upgrade
+  name: mutating-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook
+  template:
+    metadata:
+      labels:
+        app: webhook
+      name: webhook
+    spec:
+      containers:
+        - name: webhook
+          image: myawesomeregistry.example.com:5000/rook-upgrade:v0.1
+          imagePullPolicy: Always
+          args:
+            - "--bind=0.0.0.0:8443"
+            - "--certfile=/certs/server.crt"
+            - "--keyfile=/certs/server.key"
+            - "app:app"
+          volumeMounts:
+            - readOnly: true
+              mountPath: /certs
+              name: webhook-certs
+          readinessProbe:
+            httpGet:
+              path: /health
+              scheme: HTTPS
+              port: 8443
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              scheme: HTTPS
+              port: 8443
+            initialDelaySeconds: 3
+            periodSeconds:
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: webhook-certs
